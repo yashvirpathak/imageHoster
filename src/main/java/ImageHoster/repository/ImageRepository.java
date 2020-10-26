@@ -1,9 +1,12 @@
 package ImageHoster.repository;
 
+import ImageHoster.model.Comment;
 import ImageHoster.model.Image;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 //The annotation is a special type of @Component annotation which describes that the class defines a data repository
@@ -110,4 +113,23 @@ public class ImageRepository {
         }
     }
 
+    // This method creates new comment
+    public void createNewComment(Integer imageId, String comment){
+        EntityManager em = emf.createEntityManager();
+        EntityTransaction transaction = em.getTransaction();
+
+        try {
+            transaction.begin();
+            Image image = em.find(Image.class, imageId);
+            List<Comment> comments=new ArrayList<>();
+            Comment comment1=new Comment();
+            comment1.setText(comment);
+            comment1.setCreatedDate(new Date());
+            comments.add(comment1);
+            image.setComments(comments);
+            transaction.commit();
+        } catch (Exception e) {
+            transaction.rollback();
+        }
+    }
 }
