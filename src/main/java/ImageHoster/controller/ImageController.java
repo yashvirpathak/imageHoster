@@ -95,12 +95,24 @@ public class ImageController {
     //The method first needs to convert the list of all the tags to a string containing all the tags separated by a comma and then add this string in a Model type object
     //This string is then displayed by 'edit.html' file as previous tags of an image
     @RequestMapping(value = "/editImage")
-    public String editImage(@RequestParam("imageId") Integer imageId, Model model) {
+    public String editImage(@RequestParam("imageId") Integer imageId, Model model, HttpSession session) {
         Image image = imageService.getImage(imageId);
 
         String tags = convertTagsToString(image.getTags());
         model.addAttribute("image", image);
         model.addAttribute("tags", tags);
+
+        // Fixed bug- Only owner of the image can edit the image
+        // setting the "editError" attribute to false as default
+        // compare logged-in user with image owner. If both are same, redirect to edit page else remain on the same page.
+        model.addAttribute("editError", false);
+        User user = (User) session.getAttribute("loggeduser");
+        if(!image.getUser().getUsername().toLowerCase().equals(user.getUsername().toLowerCase())){
+            // if different user, set "editError" as false and reload the same page.
+            model.addAttribute("editError", true);
+            return "images/image";
+        }
+
         return "images/edit";
     }
 
@@ -142,8 +154,22 @@ public class ImageController {
     //This controller method is called when the request pattern is of type 'deleteImage' and also the incoming request is of DELETE type
     //The method calls the deleteImage() method in the business logic passing the id of the image to be deleted
     //Looks for a controller method with request mapping of type '/images'
-    @RequestMapping(value = "/deleteImage", method = RequestMethod.DELETE)
-    public String deleteImageSubmit(@RequestParam(name = "imageId") Integer imageId) {
+    @RequestMapping(value = "/deleteImage", method = RequestMethod.POST)
+    public String deleteImageSubmit(@RequestParam(name = "imageId") Integer imageId, Model model, HttpSession session) {
+        // Fixed bug- Only owner of the image can delete the image
+        // setting the "deleteError" attribute to false as default
+        // compare logged-in user with image owner. If both are same, delete image else remain on the same page.
+        model.addAttribute("deleteError", false);
+        Image image = imageService.getImage(imageId);
+        User user = (User) session.getAttribute("loggeduser");
+        if(!image.getUser().getUsername().toLowerCase().equals(user.getUsername().toLowerCase())){
+            // if different user, set "deleteError" as false and reload the same page.
+            String tags = convertTagsToString(image.getTags());
+            model.addAttribute("image", image);
+            model.addAttribute("tags", tags);
+            model.addAttribute("deleteError", true);
+            return "images/image";
+        }
         imageService.deleteImage(imageId);
         return "redirect:/images";
     }
