@@ -53,6 +53,7 @@ public class ImageController {
         Image image = imageService.getImage(id);
         model.addAttribute("image", image);
         model.addAttribute("tags", image.getTags());
+        model.addAttribute("comments",image.getComments());
         return "images/image";
     }
 
@@ -110,6 +111,7 @@ public class ImageController {
         if(!image.getUser().getUsername().toLowerCase().equals(user.getUsername().toLowerCase())){
             // if different user, set "editError" as false and reload the same page.
             model.addAttribute("editError", true);
+            model.addAttribute("comments",image.getComments());
             return "images/image";
         }
 
@@ -168,6 +170,7 @@ public class ImageController {
             model.addAttribute("image", image);
             model.addAttribute("tags", tags);
             model.addAttribute("deleteError", true);
+            model.addAttribute("comments",image.getComments());
             return "images/image";
         }
         imageService.deleteImage(imageId);
