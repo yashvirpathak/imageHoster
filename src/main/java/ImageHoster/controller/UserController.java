@@ -34,14 +34,27 @@ public class UserController {
         UserProfile profile = new UserProfile();
         user.setProfile(profile);
         model.addAttribute("User", user);
+        model.addAttribute("passwordTypeError", false);
         return "users/registration";
     }
 
     //This controller method is called when the request pattern is of type 'users/registration' and also the incoming request is of POST type
     //This method calls the business logic and after the user record is persisted in the database, directs to login page
     @RequestMapping(value = "users/registration", method = RequestMethod.POST)
-    public String registerUser(User user) {
-        userService.registerUser(user);
+    public String registerUser(User user, Model model) {
+        boolean isUserRegistered = userService.registerUser(user);
+
+        // Setting model attribute value "false" as default
+        model.addAttribute("passwordTypeError", false);
+
+        // If incorrect password, show error message to user
+        if(!isUserRegistered){
+            model.addAttribute("User", user);
+            model.addAttribute("passwordTypeError", true);
+            return "users/registration";
+        }
+
+        // If valid password, user is logged in
         return "redirect:/users/login";
     }
 
