@@ -16,6 +16,7 @@ public class UserService {
 
     //Call the registerUser() method in the UserRepository class to persist the user record in the database
     public boolean registerUser(User newUser) {
+        // if valid password, register user and return true otherwise return false
         if(isValidPassord(newUser.getPassword())){
             userRepository.registerUser(newUser);
             return true;
@@ -23,11 +24,13 @@ public class UserService {
         return false;
     }
 
+    // Method to validate password
     private boolean isValidPassord(String pwd){
+        // Regex to check password
         String regex = "^(?=.*[0-9])"
                 + "(?=.*[a-z])(?=.*[A-Z])"
                 + "(?=.*[@#$%^&+=])"
-                + "(?=\\S+$)$";
+                + "(?=\\S+$).{1,20}$";
 
         // Compile the ReGex
         Pattern p = Pattern.compile(regex);
